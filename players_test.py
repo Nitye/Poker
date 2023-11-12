@@ -17,7 +17,12 @@ class A:
         self.__class__.instances.append(self)
 a1 = A()
 a2 = A()
+l3 = [a2,a1]
 print(A.instances)
+print(l3)
+l1  = (1,2,3)
+l2 =  (2,3,1)
+print(l1 == l2)
 # dog = [1,22,3]
 # dog2 = dog.copy()
 # dog.remove(1)
