@@ -281,7 +281,7 @@ def add_score(player, player_score):
   if list1[8][2] == True:
     list_dup += list1[8][1]
     for i in list1[8][1]:
-      player_score += int(card_score[i])*100
+      player_score += card_score[i]*100
   return [player_score, list_dup]
  
 def add_high_card_score(player, player_score, list_dup):
@@ -344,18 +344,7 @@ def compare_hands(hands, num_players):
   for i in range(0, num_players):
     player_list_dict["player%s_list" %(i+1)] = add_score(player_hands["player%s" %(i+1)], player_scores["player%s_score" %(i+1)])
     player_scores["player%s_score" %(i+1)] = add_high_card_score(player_hands["player%s" %(i+1)], player_list_dict["player%s_list" %(i+1)][0], player_list_dict["player%s_list" %(i+1)][1])
-  print(player_hands)
-  print(player_scores)
-  max_score = max(player_scores.values())
-  unique_scores = remove_dup_list(player_scores.values())[0]
-  d = remove_dup_list(player_scores.values())[1]
-  if len(unique_scores) == num_players or d[max(d.keys())] == 1:
-    for z in range(0,num_players):
-      if max_score == player_scores["player%s_score" %(z+1)]:
-        print(f"Player {z+1} wins")
-  else:
-    print('Draw')
 
-num_players = int(input('Enter number of players: '))
-hands = distribute_cards(num_players)
-compare_hands(hands, num_players)
+  return player_scores
+
+

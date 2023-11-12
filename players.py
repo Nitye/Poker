@@ -1,6 +1,4 @@
-# from cards import distribute_cards
-
-# hands = distribute_cards(3)
+import cards
 
 class player():
   pot = 0
@@ -13,7 +11,9 @@ class player():
   max_folds = 0
   _bank_ = 0
   players = []
+  table_cards = None
   blind_bet = 50
+  player_scores = {}
 
   @classmethod
   def draw_winnings_(cls, num_people):
@@ -67,6 +67,8 @@ class player():
       player._play_ = False
 
   def __init__(self, name,  bank):
+    self.cards = None
+    self.score = 0
     self.__class__._bank_ = bank
     self.name = name
     self.bank = bank
@@ -160,6 +162,7 @@ p1 = player(p1_name, bank)
 p2 =  player(p2_name, bank)
 p3 = player(p3_name, bank)
 
+
 # players_in_play = player.check_player_play(players_in_play)
 def ante(ante):
   for k in player.players:
@@ -175,10 +178,25 @@ def blind_bet():
     elif (player.turn)%(player.num_players) == (player.num_players-1):
       player.blind_(player.players[0], player.players[1], 50)
 
+def add_cards():
+  players_in_play = player.check_player_play(player.players.copy())
+  hands = cards.distribute_cards(3)
+  player.table_cards = hands['table_cards']
+  k=1
+  for i in players_in_play:
+    i.cards = hands['hand%s' %k]
+    scores = cards.compare_hands(hands, 3).copy()
+    i.score = scores['player%s_score' %k]
+    k+=1
+  k=1
+  player.player_scores = cards.compare_hands(hands, 3).copy()
+  return players_in_play
+
 def pre_card_bet():
   players_in_play = player.players.copy()
   while player._play_ == True:
     for i in players_in_play:
+      print(i.cards, i.table_cards, i.score)
       if i.check == True:
         continue
       else:
@@ -200,7 +218,7 @@ def pre_card_bet():
               j.uncheck_()
           print("Raised to ", (b))
         elif a == 3:
-          if i == player.big_blind_player & player.big_blind_player.current_bet == 50:
+          if (i == player.big_blind_player) & (player.big_blind_player.current_bet == 50):
             continue
           else:
             i.fold_()
@@ -255,11 +273,25 @@ def post_card_bet():
     k.reset()
   player.players[0].reset_cls()
 
+def compare_score(player_scores, num_players):
+  max_score = max(player_scores.values())
+  unique_scores = cards.remove_dup_list(player_scores.values())[0]
+  d = cards.remove_dup_list(player_scores.values())[1]
+  if len(unique_scores) == num_players or d[max(d.keys())] == 1:
+    for z in range(0,num_players):
+      if max_score == player_scores["player%s_score" %(z+1)]:
+        print(f"{add_cards()[z].name} wins")
+  else:
+    print('Draw')
+
+add_cards()
+
 ante(5)
 blind_bet()
 pre_card_bet()
 print("end of pre card bet")
 post_card_bet()
+compare_score(player.player_scores, 3)
 print(p1.bank)
 print(p2.bank)
 print(p3.bank)
