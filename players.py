@@ -66,22 +66,28 @@ class player():
     else:
       player._play_ = False
 
+  @classmethod
+  def reset_all_(cls):
+    for i in cls.players:
+      i.reset()
+
+  @classmethod
+  def reset_cls(cls):
+    cls._play_ = True
+    cls.bet = 0
+
   def __init__(self, name,  bank):
     self.cards = None
     self.score = 0
     self.__class__._bank_ = bank
     self.name = name
     self.bank = bank
+    self.prev_bank = bank
     self.play = True
     self.__class__.players.append(self)
     self.__class__.num_players+=1
     self.reset()
     print(self.name, self.bank)
-
-  
-  def reset_cls(self):
-    self.__class__._play_ = True
-    self.__class__.bet = 0
 
   def reset(self):
     self.bet = 0
@@ -146,13 +152,26 @@ class player():
     player.pot+=blind_bet//2
   
   def win_(self):
-    self.bank+=player.pot
+    this_bet = 2*(self.prev_bank-self.bank)
+    if player.pot<=this_bet:
+      self.bank+=player.pot
+    else:
+      self.bank+=this_bet
+      player.pot-=this_bet
     player.pot = 0
     player.turn += 1
+    self.prev_bank = self.bank
+    
   
   def draw_(self, draw_winnings):
-    self.bank += draw_winnings
-    player.pot -= draw_winnings
+    this_bet = 2*(self.prev_bank-self.bank)
+    if draw_winnings<=this_bet:
+      self.bank += draw_winnings
+      player.pot -= draw_winnings
+    else:
+      self.bank += this_bet
+      player.pot -= this_bet
+    self.prev_bank = self.bank
 
 p1_name = input("Enter first player: ")
 p2_name = input("Enter second player: ")
@@ -231,7 +250,7 @@ def pre_card_bet():
         print(i.bank)
   for k in player.players:
     k.reset()
-  player.players[0].reset_cls()
+  player.reset_cls()
   
 def post_card_bet():
   players_in_play = player.check_player_play(player.players.copy())
@@ -243,8 +262,8 @@ def post_card_bet():
         a = int(input(f"Enter option {i.name}: "))
         if a == 1:
           i.call_()
-          if player.check == True:
-            print("Check")
+          if player.check == True or player.bet == 0:
+            print("Check") 
           else:
             print("Called ", player.bet)
         elif a == 2:
@@ -283,7 +302,7 @@ def compare_score(player_scores, num_players):
         print(f"{add_cards()[z].name} wins")
         add_cards()[z].win_()
   else:
-    draw_winnings = player.pot/d[max(d.keys())]
+    draw_winnings = player.draw_winnings_(d[max(d.keys())])
     for y in add_cards():
       if y.score == max(d.keys()):
         y.draw_(draw_winnings)
@@ -295,8 +314,10 @@ ante(5)
 blind_bet()
 pre_card_bet()
 print("end of pre card bet")
+# add if eveyrone else folds who didn't wins
 post_card_bet()
-compare_score(player.player_scores, 3)
+players_in_play = player.check_player_play(player.players)
+compare_score(player.player_scores, len(players_in_play))
 print(p1.bank)
 print(p2.bank)
 print(p3.bank)
