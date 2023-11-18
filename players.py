@@ -277,11 +277,16 @@ def compare_score(player_scores, num_players):
   max_score = max(player_scores.values())
   unique_scores = cards.remove_dup_list(player_scores.values())[0]
   d = cards.remove_dup_list(player_scores.values())[1]
-  if len(unique_scores) == num_players or d[max(d.keys())] == 1:
+  if d[max(d.keys())] == 1:
     for z in range(0,num_players):
       if max_score == player_scores["player%s_score" %(z+1)]:
         print(f"{add_cards()[z].name} wins")
+        add_cards()[z].win_()
   else:
+    draw_winnings = player.pot/d[max(d.keys())]
+    for y in add_cards():
+      if y.score == max(d.keys()):
+        y.draw_(draw_winnings)
     print('Draw')
 
 add_cards()
