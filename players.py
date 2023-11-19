@@ -133,6 +133,9 @@ class player():
     if player.max_folds != len(player.players):
       self.play = False
       player.max_folds+=1
+      a = player.players.index(self)
+      key = 'player'+str(a+1)+'_score'
+      player.player_scores.pop(key)
 
   def raise_(self):
     self.bank-=(self.bet-self.current_bet)
@@ -151,7 +154,7 @@ class player():
     self.current_bet=blind_bet//2
     player.pot+=blind_bet//2
   
-  def win_(self):
+  def win_(self, players_in_play):
     this_bet = 2*(self.prev_bank-self.bank)
     if player.pot<=this_bet:
       self.bank+=player.pot
@@ -161,6 +164,8 @@ class player():
     player.pot = 0
     player.turn += 1
     self.prev_bank = self.bank
+    players_in_play.remove(self)
+    return players_in_play
     
   
   def draw_(self, draw_winnings):
@@ -215,7 +220,7 @@ def pre_card_bet():
   players_in_play = player.players.copy()
   while player._play_ == True:
     for i in players_in_play:
-      print(i.cards, i.table_cards, i.score)
+      print(i.cards)
       if i.check == True:
         continue
       else:
@@ -292,7 +297,7 @@ def post_card_bet():
     k.reset()
   player.players[0].reset_cls()
 
-def compare_score(player_scores, num_players):
+def compare_score(player_scores, num_players, players_in_play):
   max_score = max(player_scores.values())
   unique_scores = cards.remove_dup_list(player_scores.values())[0]
   d = cards.remove_dup_list(player_scores.values())[1]
@@ -300,7 +305,9 @@ def compare_score(player_scores, num_players):
     for z in range(0,num_players):
       if max_score == player_scores["player%s_score" %(z+1)]:
         print(f"{add_cards()[z].name} wins")
-        add_cards()[z].win_()
+        add_cards()[z].win_(players_in_play)
+        key = 'player' + str(z+1) + '_score'
+        player.player_scores.pop(key)
   else:
     draw_winnings = player.draw_winnings_(d[max(d.keys())])
     for y in add_cards():
@@ -313,11 +320,24 @@ add_cards()
 ante(5)
 blind_bet()
 pre_card_bet()
-print("end of pre card bet")
-# add if eveyrone else folds who didn't wins
+players_in_play = player.check_player_play(player.players)
+print("end of pre flop bet")
+print(player.table_cards[0:3])
 post_card_bet()
 players_in_play = player.check_player_play(player.players)
-compare_score(player.player_scores, len(players_in_play))
+print(player.table_cards[0:4])
+post_card_bet()
+players_in_play = player.check_player_play(player.players)
+print(player.table_cards)
+post_card_bet()
+players_in_play = player.check_player_play(player.players)
+if len(players_in_play) == 1:
+  players_in_play[0].win_(players_in_play)
+  print(players_in_play[0].name, " wins")
+else:
+  while player.pot != 0:
+    compare_score(player.player_scores, len(players_in_play), players_in_play)
+    players_in_play = player.check_player_play(player.players)
 print(p1.bank)
 print(p2.bank)
 print(p3.bank)

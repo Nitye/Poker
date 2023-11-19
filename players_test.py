@@ -28,6 +28,12 @@
 # dog.remove(1)
 # dog2.remove(1)
 # print(dog)
-import cards
-hands = cards.distribute_cards(3)
-print(cards.compare_hands(hands, 3))
+# import cards
+# hands = cards.distribute_cards(3)
+# print(cards.compare_hands(hands, 3))
+l1 = [1,2,40,5]
+l1.remove(40)
+print(l1)
+d2 = {'a':1,'b':2}
+d2.pop('b')
+print(d2)
