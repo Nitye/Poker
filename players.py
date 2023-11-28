@@ -85,7 +85,7 @@ class player():
     self.prev_bank = bank
     self.play = True
     self.__class__.players.append(self)
-    self.__class__.num_players+=1
+    # self.__class__.num_players+=1
     self.reset()
     print(self.name, self.bank)
 
@@ -155,12 +155,7 @@ class player():
     player.pot+=blind_bet//2
   
   def win_(self, players_in_play):
-    this_bet = 2*(self.prev_bank-self.bank)
-    if player.pot<=this_bet:
-      self.bank+=player.pot
-    else:
-      self.bank+=this_bet
-      player.pot-=this_bet
+    self.bank+=player.pot
     player.pot = 0
     player.turn += 1
     self.prev_bank = self.bank
@@ -169,13 +164,8 @@ class player():
     
   
   def draw_(self, draw_winnings):
-    this_bet = 2*(self.prev_bank-self.bank)
-    if draw_winnings<=this_bet:
-      self.bank += draw_winnings
-      player.pot -= draw_winnings
-    else:
-      self.bank += this_bet
-      player.pot -= this_bet
+    self.bank += draw_winnings
+    player.pot -= draw_winnings
     self.prev_bank = self.bank
 
 p1_name = input("Enter first player: ")
@@ -195,12 +185,17 @@ def ante(ante):
 
 def blind_bet():
   for i in range(player.num_players):
+    print(i)
+    print(player.players)
     if (player.turn)%(player.num_players)==i & i < (player.num_players-2):
       player.blind_(player.players[i+1], player.players[i+2], player.blind_bet)
+      break
     elif (player.turn)%(player.num_players) == (player.num_players-2):
-      player.blind_(player.players[player.num_players-1], player.players[0], player.blind_bet)
+      player.blind_(player.players[-1], player.players[0], player.blind_bet)
+      break
     elif (player.turn)%(player.num_players) == (player.num_players-1):
       player.blind_(player.players[0], player.players[1], 50)
+      break
 
 def add_cards():
   players_in_play = player.check_player_play(player.players.copy())
@@ -295,7 +290,7 @@ def post_card_bet():
         print(i.bank)
   for k in player.players:
     k.reset()
-  player.players[0].reset_cls()
+  player.reset_cls()
 
 def compare_score(player_scores, num_players, players_in_play):
   max_score = max(player_scores.values())
@@ -315,30 +310,32 @@ def compare_score(player_scores, num_players, players_in_play):
         y.draw_(draw_winnings)
     print('Draw')
 
-add_cards()
-
-ante(5)
-blind_bet()
-pre_card_bet()
-players_in_play = player.check_player_play(player.players)
-print("end of pre flop bet")
-print(player.table_cards[0:3])
-post_card_bet()
-players_in_play = player.check_player_play(player.players)
-print(player.table_cards[0:4])
-post_card_bet()
-players_in_play = player.check_player_play(player.players)
-print(player.table_cards)
-post_card_bet()
-players_in_play = player.check_player_play(player.players)
-if len(players_in_play) == 1:
-  players_in_play[0].win_(players_in_play)
-  print(players_in_play[0].name, " wins")
-else:
-  while player.pot != 0:
-    compare_score(player.player_scores, len(players_in_play), players_in_play)
-    players_in_play = player.check_player_play(player.players)
-print(p1.bank)
-print(p2.bank)
-print(p3.bank)
-print(player.pot)
+while True:
+  add_cards()
+  ante(5)
+  blind_bet()
+  pre_card_bet()
+  players_in_play = player.check_player_play(player.players.copy())
+  while len(players_in_play) != 1:
+    print("end of pre flop bet")
+    print(player.table_cards[0:3])
+    post_card_bet()
+    players_in_play = player.check_player_play(player.players.copy())
+    print(player.table_cards[0:4])
+    post_card_bet()
+    players_in_play = player.check_player_play(player.players.copy())
+    print(player.table_cards)
+    post_card_bet()
+    players_in_play = player.check_player_play(player.players.copy())
+    break
+  if len(players_in_play) == 1:
+    print(players_in_play[0].name, " wins")
+    players_in_play[0].win_(players_in_play)
+  else:
+    while player.pot != 0:
+      compare_score(player.player_scores, len(players_in_play), players_in_play)
+      players_in_play = player.check_player_play(player.players.copy())
+  print(p1.bank)
+  print(p2.bank)
+  print(p3.bank)
+  print(player.pot)
