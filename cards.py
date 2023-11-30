@@ -1,15 +1,10 @@
 import random
 import pandas as pd
-deck = []
+deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
+         '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
+           '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
+             '♦A', '♦2', '♦3', '♦4', '♦5', '♦6', '♦7', '♦8', '♦9', '♦10', '♦J', '♦Q', '♦K']
 suit_symbols = ['\u2660', '\u2663', '\u2665', '\u2666']
-for n in suit_symbols:
-  for m  in range(1,14):
-    if m in [1,11,12,13]:
-      face_cards = {1: 'A', 11: 'J', 12: 'Q', 13: 'K'}
-      m = face_cards[m]
-    else: 
-      pass
-    deck.append(n+str(m))
 
 suits={'Spades':deck[0:13], 'Clubs': deck[13:26], 
        'Hearts': deck[26:39], 'Dimmaonds' : deck[39:]}
@@ -198,10 +193,10 @@ def three_of_a_kind(player, player_score):
 def two_pair(player, player_score):
   pair_list = pair(player, player_score)
   player_score = 0
-  two_pair_bool = 'False'
+  two_pair_bool = False
   cards = []
   if len(pair_list[1]) >= 2:
-    two_pair_bool = 'True'
+    two_pair_bool = True
     cards.append(pair_list[1][0])
     cards.append(pair_list[1][1])
     player_score += card_score[pair_list[1][0]]
@@ -242,7 +237,7 @@ def remove_duplicates(player):
     three_list[2] = False
     if len(pair_list[1]) == 1:
       pair_list[2] = False
-      two_pair_list = False
+      two_pair_list[2] = False
     elif len(pair_list[1]) >= 2:
       two_pair_list[2] = False
   return [royal_flush_list, straight_flush_list, four_list,full_house_list, flush_list, straight_list,  three_list,two_pair_list, pair_list]
@@ -273,7 +268,7 @@ def add_score(player, player_score):
     list_dup += list1[6][1]
     player_score += 30000
     player_score += list1[6][0]*100
-  if list1[7][2] == 'True':
+  if list1[7][2] == True:
     list_dup += list1[7][1]
     player_score += 15000
     for i in list1[7][1]:
