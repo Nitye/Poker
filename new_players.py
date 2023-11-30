@@ -125,6 +125,11 @@ class player():
       i+=1
 
   @classmethod
+  def remove_cards(cls):
+    for j in player.players:
+      j.cards = None
+
+  @classmethod
   def ante(cls):
     for k in cls.players:
       cls.pot+=player.an
@@ -170,6 +175,7 @@ class player():
     self.bank = bank
     self.prev_bank = bank
     self.play = True
+    self.cards = None
     self.__class__.players.append(self)
     self.__class__.num_players+=1
     self.reset()
@@ -177,7 +183,6 @@ class player():
 
   def reset(self):
     self.score = 0
-    self.cards = None
     self.bet = 0
     self.all_in = False
     self.check = False
