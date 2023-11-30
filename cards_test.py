@@ -397,14 +397,24 @@
 # compare_hands(hands, 4)
 # hands = distribute_cards(3)
 # compare_hands(hands, 3)
-deck = []
-suit_symbols = ['\u2660', '\u2663', '\u2665', '\u2666']
-for n in suit_symbols:
-  for m  in range(1,14):
-    if m in [1,11,12,13]:
-      face_cards = {1: 'A', 11: 'J', 12: 'Q', 13: 'K'}
-      m = face_cards[m]
-    else: 
-      pass
-    deck.append(n+str(m))
-print(deck)
+# deck = []
+# suit_symbols = ['\u2660', '\u2663', '\u2665', '\u2666']
+# for n in suit_symbols:
+#   for m  in range(1,14):
+#     if m in [1,11,12,13]:
+#       face_cards = {1: 'A', 11: 'J', 12: 'Q', 13: 'K'}
+#       m = face_cards[m]
+#     else: 
+#       pass
+#     deck.append(n+str(m))
+# print(deck)
+l1 = [1,2,3,4]
+# j = 1
+# for i in l1[j:]+l1[:j]:
+#   print(i)
+print(l1.index(1))
+l1.insert(2,7)
+print(l1)
+d = {'a':1,'b':2,'c':3}
+d.pop(d.key(1))
+print(d)

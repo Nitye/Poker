@@ -19,8 +19,10 @@ class player():
   players = []
   table_cards = None
   blind_bet = 50
+  an = 5
   player_scores = {}
   hands = []
+  broke_players = {}
 
   @classmethod
   def draw_winnings_(cls, num_people):
@@ -28,21 +30,29 @@ class player():
     return cls.pot/num_people
 
   @classmethod
-  def set_blind_bet(cls):
+  def set_ante_and_blind_bet(cls):
     blind_bets = []
-    c = cls.bank/100
+    antes = []
+    ante = cls._bank_/100
+    c = cls._bank_/20
     for i in range(1,6):
       blind_bets.append(c*i)
+      antes.append(ante*i)
     if cls.turn <= 5:
-      cls.blind_bet = blind_bets[0]
+      cls.blind_bet = round(blind_bets[0])
+      cls.an = round(antes[0])
     elif cls.turn <= 10:
-      cls.blind_bet = blind_bets[1]
+      cls.blind_bet = round(blind_bets[1])
+      cls.an = round(antes[1])
     elif cls.turn <= 15:
-      cls.blind_bet = blind_bets[2]
+      cls.blind_bet = round(blind_bets[2])
+      cls.an = round(antes[2])
     elif cls.turn <= 20:
-      cls.blind_bet = blind_bets[3]
+      cls.blind_bet = round(blind_bets[3])
+      cls.an = round(antes[3])
     else:
-      cls.blind_bet = blind_bets[4]
+      cls.blind_bet = round(blind_bets[4])
+      cls.an = round(antes[4])
 
   @classmethod
   def blind_(cls, player1, player2, blind_bet):
@@ -83,7 +93,7 @@ class player():
     cls._play_ = True
     cls.bet = 0
     cls.hands = []
-    cls.table_cards = None
+    cls.big_blind_player = None
 
   @classmethod
   def draw_cards(cls, num):
@@ -114,8 +124,47 @@ class player():
       j.cards = player.hands[i]
       i+=1
 
+  @classmethod
+  def ante(cls):
+    for k in cls.players:
+      cls.pot+=player.an
+      k.bank-=player.an
+
+  @classmethod
+  def check_broke(cls):
+    for i in player.players:
+      if i.bank <= 0:
+        player.players.remove(i)
+        player.broke_players[player.players.index(i)] = i
+      else:
+        continue
+
+  @classmethod
+  def broke_unbroke(cls):
+    if len(player.broke_players) != 0:
+      for i in player.broke_players.keys():
+        print("1. Rebuy")
+        print("2. Spectate")
+        print("3. Leave Table")
+        b = 0
+        while b == 0:
+          a = int(input(f"Enter option {player.broke_players[i].name}: "))
+          if a == 1:
+            print("Rebought")
+            cls.broke_players.remove(player.broke_players[i])
+            cls.players.insert(i, player.broke_players[i])
+            b=1
+            i.bank+=cls._bank_
+          elif a == 2:
+            b = 1
+            cls.broke_players.remove(i)
+            print("Spectating")
+          elif a == 3:
+            b = 1
+          else:
+            pass
+
   def __init__(self, name,  bank):
-    self.score = 0
     self.__class__._bank_ = bank
     self.name = name
     self.bank = bank
@@ -127,6 +176,7 @@ class player():
     print(self.name, self.bank)
 
   def reset(self):
+    self.score = 0
     self.cards = None
     self.bet = 0
     self.all_in = False
@@ -171,9 +221,6 @@ class player():
     if player.max_folds != len(player.players):
       self.play = False
       player.max_folds+=1
-      a = player.players.index(self)
-      key = 'player'+str(a+1)+'_score'
-      player.player_scores.pop(key)
 
   def raise_(self):
     self.bank-=(self.bet-self.current_bet)
@@ -182,6 +229,7 @@ class player():
     self.check_() 
 
   def big_blind_(self, blind_bet):
+    print(f"{self.name} big blind")
     self.bank-=blind_bet
     self.current_bet=blind_bet
     player.big_blind_player = self
@@ -206,12 +254,8 @@ class player():
     player.pot -= draw_winnings
     self.prev_bank = self.bank
 
-p1 = player('n',1000)
-p2 = player('p',1000)
-p3 = player('t',1000)
-player.distribute_cards()
-player.add_cards()
-print(p1.cards)
-print(p2.cards)
-print(p3.cards)
-print(player.table_cards)
+  def add_score(self):
+    cards = self.cards + player.table_cards
+    l1 = new_cards.add_score(cards, 0)
+    self.score += new_cards.add_high_card_score(cards, l1[0], l1[1])
+
