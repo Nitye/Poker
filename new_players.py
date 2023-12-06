@@ -12,6 +12,7 @@ class player():
   _play_ = True
   check = True
   big_blind_player = None
+  player_in_turn = None
   num_players = 0
   max_folds = 0
   _bank_ = 0

@@ -13,9 +13,9 @@ def blind_bet():
       player.blind_(player.players[1], player.players[0], player.blind_bet)
       break
 
-def pre_card_bet(player_in_turn):
+def pre_card_bet():
   players_in_play = player.players.copy()
-  d = player.players.index(player_in_turn)
+  d = player.players.index(player.player_in_turn)
   while player._play_ == True:
     for i in players_in_play[d:]+players_in_play[:d]:
       if player.max_folds != len(player.players)-1:
@@ -59,6 +59,7 @@ def pre_card_bet(player_in_turn):
               print("Folded")
           else:
             continue
+          player.player_in_turn = i
           print(i.bank)
       else:
         for j in players_in_play:
@@ -74,14 +75,14 @@ def pre_card_bet(player_in_turn):
     k.reset()
   player.reset_cls()
   
-def post_card_bet(player_in_turn, players_in_play, turn):
+def post_card_bet(players_in_play, turn):
   if turn == 1:
     l1 = player.table_cards[:3]
   elif turn == 2:
     l1 = player.table_cards[:4]
   else:
     l1 = player.table_cards
-  d = player.players.index(player_in_turn)
+  d = player.players.index(player.player_in_turn)
   while player._play_ == True:
     for i in players_in_play[d:]+players_in_play[:d]:
       if player.max_folds != len(player.players)-1:
@@ -128,6 +129,7 @@ def post_card_bet(player_in_turn, players_in_play, turn):
               continue
           else:
             continue
+          player.player_in_turn = i
           print(i.bank)
       else:
         for j in players_in_play:
@@ -183,17 +185,17 @@ while True:
     pass
   else:
     k = 0
-  player_in_turn = player.players[k]
+  player.player_in_turn = player.players[k]
   player.distribute_cards()
   player.add_cards()
-  pre_card_bet(player_in_turn)
+  pre_card_bet()
   print("End of Pre-Flop Bet")
   players_in_play = player.check_player_play(player.players.copy())
-  post_card_bet(player_in_turn, players_in_play, 1)
+  post_card_bet(players_in_play, 1)
   players_in_play = player.check_player_play(players_in_play)
-  post_card_bet(player_in_turn, players_in_play, 2)
+  post_card_bet(players_in_play, 2)
   players_in_play = player.check_player_play(players_in_play)
-  post_card_bet(player_in_turn, players_in_play, 3)
+  post_card_bet(players_in_play, 3)
   players_in_play = player.check_player_play(players_in_play)
   if len(players_in_play) == 1:
       print(players_in_play[0].name, " wins")
