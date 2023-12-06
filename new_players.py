@@ -18,8 +18,8 @@ class player():
   _bank_ = 0
   players = []
   table_cards = None
-  blind_bet = 50
-  an = 5
+  blind_bet = 0
+  an = 0
   player_scores = {}
   hands = []
   broke_players = {}
@@ -234,7 +234,6 @@ class player():
     self.check_() 
 
   def big_blind_(self, blind_bet):
-    print(f"{self.name} big blind")
     self.bank-=blind_bet
     self.current_bet=blind_bet
     player.big_blind_player = self
