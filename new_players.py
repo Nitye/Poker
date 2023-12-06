@@ -1,12 +1,11 @@
 import new_cards
 import random
 
-deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
-         '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
-           '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
-             '♦A', '♦2', '♦3', '♦4', '♦5', '♦6', '♦7', '♦8', '♦9', '♦10', '♦J', '♦Q', '♦K']
-
 class player():
+  deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
+      '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
+        '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
+          '♦A', '♦2', '♦3', '♦4', '♦5', '♦6', '♦7', '♦8', '♦9', '♦10', '♦J', '♦Q', '♦K']
   pot = 0
   turn = 0
   bet = 0
@@ -89,20 +88,27 @@ class player():
       i.reset()
 
   @classmethod
+  def reset_play_for_all(cls):
+    for i in cls.players:
+      i.play = True
+
+  @classmethod
   def reset_cls(cls):
     cls._play_ = True
     cls.bet = 0
-    cls.hands = []
-    cls.big_blind_player = None
+    cls.deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
+      '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
+        '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
+          '♦A', '♦2', '♦3', '♦4', '♦5', '♦6', '♦7', '♦8', '♦9', '♦10', '♦J', '♦Q', '♦K']
 
   @classmethod
   def draw_cards(cls, num):
     a = 0
     dummy_hand = []
     while a < num:
-      card_a = random.choice(deck)
-      removed_card_index = deck.index(card_a)
-      deck.pop(removed_card_index)
+      card_a = random.choice(cls.deck)
+      removed_card_index = cls.deck.index(card_a)
+      cls.deck.pop(removed_card_index)
       a+=1
       dummy_hand.append(card_a)
     return dummy_hand
@@ -247,16 +253,19 @@ class player():
   def win_(self, players_in_play):
     self.bank+=player.pot
     player.pot = 0
+    player.max_folds = 0
     player.turn += 1
     self.prev_bank = self.bank
     players_in_play.remove(self)
+    player.reset_play_for_all()
     return players_in_play
-    
   
   def draw_(self, draw_winnings):
     self.bank += draw_winnings
     player.pot -= draw_winnings
     self.prev_bank = self.bank
+    player.reset_play_for_all()
+    player.max_folds = 0
 
   def add_score(self):
     cards = self.cards + player.table_cards
