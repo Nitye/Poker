@@ -80,8 +80,10 @@ def pre_card_bet():
   for k in player.players:
     k.reset()
   player.reset_cls()
+  print(player.all_in_players)
   
 def post_card_bet(players_in_play, turn):
+  print(players_in_play)
   if turn == 1:
     l1 = player.table_cards[:3]
   elif turn == 2:
@@ -91,58 +93,61 @@ def post_card_bet(players_in_play, turn):
   d = player.players.index(player.player_in_turn)
   while player._play_ == True:
     for i in players_in_play[d:]+players_in_play[:d]:
-      if player.max_folds != len(player.players)-1:
-        if i.check == True:
-          continue
+      if player.max_folds != player.num_players-1:
+        if players_in_play == player.all_in_players:
+          player._play_ = False
         else:
-          print(l1)
-          print(i.cards)
-          if player.check == True:
-            opt_1 = 'Check'
-          else: 
-            if player.bet-i.current_bet == 0:
-              opt_1 = 'Check'
-            else:
-              opt_1 = 'Call ' + str(player.bet-i.current_bet)
-          print('1. ', opt_1)
-          print("2. Raise")
-          if player.bet == 0:
-            pass
+          if i.check == True:
+            continue
           else:
-            print('3. Fold')
-          a = int(input(f"Enter option {i.name}: "))
-          if a == 1:
-            player.player_in_turn = i
-            i.call_()
-            if player.check == True or player.bet == 0:
-              print("Check") 
-            else:
-              print("Called ", player.bet)
-          elif a == 2:
-            player.player_in_turn = i
-            b = int(input("Enter bet: "))
-            i.bet_(b)
-            i.raise_()
-            for j in players_in_play:
-              if j == i:
-                continue
+            print(l1)
+            print(i.cards)
+            if player.check == True:
+              opt_1 = 'Check'
+            else: 
+              if player.bet-i.current_bet == 0:
+                opt_1 = 'Check'
               else:
-                j.uncheck_()
-            print("Raised to ", (b))
-          elif a == 3:
-            c = players_in_play.index(i)
-            if c < len(players_in_play)-1:
-              player.player_in_turn = players_in_play[c+1]
+                opt_1 = 'Call ' + str(player.bet-i.current_bet)
+            print('1. ', opt_1)
+            print("2. Raise")
+            if player.bet == 0:
+              pass
             else:
-              player.player_in_turn = players_in_play[0]
-            if player.check == False:
-              i.fold_()
-              print("Folded")
+              print('3. Fold')
+            a = int(input(f"Enter option {i.name}: "))
+            if a == 1:
+              player.player_in_turn = i
+              i.call_()
+              if player.check == True or player.bet == 0:
+                print("Check") 
+              else:
+                print("Called ", player.bet)
+            elif a == 2:
+              player.player_in_turn = i
+              b = int(input("Enter bet: "))
+              i.bet_(b)
+              i.raise_()
+              for j in players_in_play:
+                if j == i:
+                  continue
+                else:
+                  j.uncheck_()
+              print("Raised to ", (b))
+            elif a == 3:
+              c = players_in_play.index(i)
+              if c < len(players_in_play)-1:
+                player.player_in_turn = players_in_play[c+1]
+              else:
+                player.player_in_turn = players_in_play[0]
+              if player.check == False:
+                i.fold_()
+                print("Folded")
+              else:
+                continue
             else:
               continue
-          else:
-            continue
-          print(i.bank)
+            print(i.bank)
       else:
         for j in players_in_play:
           j.check_check_()
@@ -203,10 +208,13 @@ while True:
   print("End of Pre-Flop Bet")
   players_in_play = player.check_player_play(player.players.copy())
   post_card_bet(players_in_play, 1)
+  print('y')
   players_in_play = player.check_player_play(players_in_play)
   post_card_bet(players_in_play, 2)
+  print('y')
   players_in_play = player.check_player_play(players_in_play)
   post_card_bet(players_in_play, 3)
+  print('y')
   players_in_play = player.check_player_play(players_in_play)
   if len(players_in_play) == 1:
       print(players_in_play[0].name, " wins")

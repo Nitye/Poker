@@ -61,7 +61,7 @@ class player():
   @classmethod
   def check_player_play(cls, players_in_play):
     for i in players_in_play:
-      if not i.play or i.all_in: 
+      if not i.play: 
         players_in_play.remove(i)
     return players_in_play
   
@@ -163,13 +163,15 @@ class player():
             print("Rebought")
             cls.players.insert(i, player.broke_players[i])
             del cls.broke_players[i]
-            b=1
             cls.players[i].bank+=cls._bank_
-          elif a == 2:
             b = 1
+          elif a == 2:
             del cls.broke_players[i]
+            cls.num_players-=1
             print("Spectating")
+            b = 1
           elif a == 3:
+            cls.num_players-=1
             b = 1
           else:
             pass
@@ -230,7 +232,7 @@ class player():
 
   def call_(self):
     self.bet = player.bet
-    if self.bet-self.current_bet > self.bank:
+    if self.bet-self.current_bet >= self.bank:
       player.pot+=self.bank
       self.bank = 0
       self.allin()
@@ -247,7 +249,7 @@ class player():
         player.max_folds+=1
 
   def raise_(self):
-    if self.bet-self.current_bet > self.bank:
+    if self.bet-self.current_bet >= self.bank:
       self.allin()
       player.pot += self.bank
       self.bank = 0
@@ -258,7 +260,7 @@ class player():
     self.check_() 
 
   def big_blind_(self, blind_bet):
-    if self.bank < blind_bet:
+    if self.bank <= blind_bet:
       player.pot += self.bank
       self.bank = 0
       self.allin()
@@ -269,7 +271,7 @@ class player():
     player.big_blind_player = self
   
   def small_blind_(self, blind_bet):
-    if self.bank < blind_bet//2:
+    if self.bank <= blind_bet//2:
       player.pot += self.bank
       self.bank = 0
       self.allin()
@@ -285,6 +287,7 @@ class player():
     player.turn += 1
     self.prev_bank = self.bank
     players_in_play.remove(self)
+    player.all_in_players.clear()
     player.reset_play_for_all()
     return players_in_play
   
@@ -293,6 +296,7 @@ class player():
     player.pot -= draw_winnings
     self.prev_bank = self.bank
     player.reset_play_for_all()
+    player.all_in_players.clear()
     player.max_folds = 0
 
   def add_score(self):
