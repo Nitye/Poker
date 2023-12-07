@@ -51,15 +51,13 @@ def num_of_a_kind(num, card, list1):
   return result
 
 def royal_flush(player,player_score):
-  list1 = []
+  list1 = [player[i] for i in range(7)]
   royal_flush_bool = False
   score = 120000
-  for i in range(0,7):
-    list1.append(player[i])
   for m in royal_flush_patterns:
     for j in m:
       l = 0
-      for k in range(0,5):
+      for k in range(5):
         if j[k] in list1:
           l+=1
         else: 

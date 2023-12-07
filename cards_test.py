@@ -416,5 +416,5 @@ print(l1.index(1))
 l1.insert(2,7)
 print(l1)
 d = {'a':1,'b':2,'c':3}
-d.pop(d.key(1))
+del d['a']
 print(d)

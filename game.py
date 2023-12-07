@@ -217,3 +217,5 @@ while True:
       compare_score(player.player_scores, players_in_play)
       players_in_play = player.check_player_play(players_in_play)
     player.remove_cards()
+    player.check_broke()
+    player.broke_unbroke()

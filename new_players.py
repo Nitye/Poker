@@ -23,7 +23,8 @@ class player():
   player_scores = {}
   hands = []
   broke_players = {}
-
+  all_in_players = []
+  
   @classmethod
   def draw_winnings_(cls, num_people):
     player.turn += 1
@@ -31,13 +32,10 @@ class player():
 
   @classmethod
   def set_ante_and_blind_bet(cls):
-    blind_bets = []
-    antes = []
-    ante = cls._bank_/100
-    c = cls._bank_/20
-    for i in range(1,6):
-      blind_bets.append(c*i)
-      antes.append(ante*i)
+    c = cls._bank_//50
+    _ = cls._bank_//200
+    blind_bets = [c*a for a in range(1,6)]
+    antes = [_*a for a in range(1,6)]
     if cls.turn <= 5:
       cls.blind_bet = round(blind_bets[0])
       cls.an = round(antes[0])
@@ -63,7 +61,7 @@ class player():
   @classmethod
   def check_player_play(cls, players_in_play):
     for i in players_in_play:
-      if i.play != True:
+      if not i.play or i.all_in: 
         players_in_play.remove(i)
     return players_in_play
   
@@ -146,15 +144,15 @@ class player():
   def check_broke(cls):
     for i in player.players:
       if i.bank <= 0:
-        player.players.remove(i)
         player.broke_players[player.players.index(i)] = i
+        player.players.remove(i)
       else:
         continue
 
   @classmethod
   def broke_unbroke(cls):
     if len(player.broke_players) != 0:
-      for i in player.broke_players.keys():
+      for i in list(player.broke_players.keys()):
         print("1. Rebuy")
         print("2. Spectate")
         print("3. Leave Table")
@@ -163,13 +161,13 @@ class player():
           a = int(input(f"Enter option {player.broke_players[i].name}: "))
           if a == 1:
             print("Rebought")
-            cls.broke_players.remove(player.broke_players[i])
             cls.players.insert(i, player.broke_players[i])
+            del cls.broke_players[i]
             b=1
-            i.bank+=cls._bank_
+            cls.players[i].bank+=cls._bank_
           elif a == 2:
             b = 1
-            cls.broke_players.remove(i)
+            del cls.broke_players[i]
             print("Spectating")
           elif a == 3:
             b = 1
@@ -185,21 +183,26 @@ class player():
     self.cards = None
     self.__class__.players.append(self)
     self.__class__.num_players+=1
+    self.all_in = False
+    self.check = False
+    self.score = 0
     self.reset()
     print(self.name, self.bank)
 
   def reset(self):
-    self.score = 0
     self.bet = 0
-    self.all_in = False
-    self.check = False
     self.current_bet = 0
+    if self.all_in:
+      pass
+    else:
+      self.check = False
 
   def check_(self):
     self.check = True
   
   def allin(self):
     self.all_in = True
+    player.all_in_players.append(self)
 
   def uncheck_(self):
     if self.all_in:
@@ -215,6 +218,10 @@ class player():
 
   def bet_(self, bet):
     player.check = False
+    if bet >= self.bank:
+      bet = self.bank
+    else:
+      pass
     if bet>=self.__class__.bet:
       self.bet = bet
       self.__class__.bet = bet
@@ -222,34 +229,54 @@ class player():
       self.bet = self.__class__.bet
 
   def call_(self):
-    # last mei uske do baar katt gaye for somme reason
     self.bet = player.bet
-    self.bank-=(self.bet-self.current_bet)
-    player.pot+=(self.bet-self.current_bet)
+    if self.bet-self.current_bet > self.bank:
+      player.pot+=self.bank
+      self.bank = 0
+      self.allin()
+    else:
+      self.bank-=(self.bet-self.current_bet)
+      player.pot+=(self.bet-self.current_bet)
     self.current_bet = self.bet
     self.check_()
 
   def fold_(self):
-    if player.max_folds != len(player.players):
-      self.play = False
-      player.max_folds+=1
+    if not self.all_in:
+      if player.max_folds != len(player.players):
+        self.play = False
+        player.max_folds+=1
 
   def raise_(self):
-    self.bank-=(self.bet-self.current_bet)
-    player.pot+=(self.bet-self.current_bet)
+    if self.bet-self.current_bet > self.bank:
+      self.allin()
+      player.pot += self.bank
+      self.bank = 0
+    else:
+      self.bank-=(self.bet-self.current_bet)
+      player.pot+=(self.bet-self.current_bet)
     self.current_bet = self.bet
     self.check_() 
 
   def big_blind_(self, blind_bet):
-    self.bank-=blind_bet
+    if self.bank < blind_bet:
+      player.pot += self.bank
+      self.bank = 0
+      self.allin()
+    else:
+      self.bank-=blind_bet
+      player.pot+=blind_bet
     self.current_bet=blind_bet
     player.big_blind_player = self
-    player.pot+=blind_bet
   
   def small_blind_(self, blind_bet):
-    self.bank-=blind_bet//2
+    if self.bank < blind_bet//2:
+      player.pot += self.bank
+      self.bank = 0
+      self.allin()
+    else:
+      self.bank-=blind_bet//2
+      player.pot+=blind_bet//2
     self.current_bet=blind_bet//2
-    player.pot+=blind_bet//2
   
   def win_(self, players_in_play):
     self.bank+=player.pot
