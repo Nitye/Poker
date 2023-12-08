@@ -94,60 +94,57 @@ def post_card_bet(players_in_play, turn):
   while player._play_ == True:
     for i in players_in_play[d:]+players_in_play[:d]:
       if player.max_folds != player.num_players-1:
-        if players_in_play == player.all_in_players:
-          player._play_ = False
+        if i.check == True:
+          continue
         else:
-          if i.check == True:
-            continue
-          else:
-            print(l1)
-            print(i.cards)
-            if player.check == True:
+          print(l1)
+          print(i.cards)
+          if player.check == True:
+            opt_1 = 'Check'
+          else: 
+            if player.bet-i.current_bet == 0:
               opt_1 = 'Check'
-            else: 
-              if player.bet-i.current_bet == 0:
-                opt_1 = 'Check'
-              else:
-                opt_1 = 'Call ' + str(player.bet-i.current_bet)
-            print('1. ', opt_1)
-            print("2. Raise")
-            if player.bet == 0:
-              pass
             else:
-              print('3. Fold')
-            a = int(input(f"Enter option {i.name}: "))
-            if a == 1:
-              player.player_in_turn = i
-              i.call_()
-              if player.check == True or player.bet == 0:
-                print("Check") 
-              else:
-                print("Called ", player.bet)
-            elif a == 2:
-              player.player_in_turn = i
-              b = int(input("Enter bet: "))
-              i.bet_(b)
-              i.raise_()
-              for j in players_in_play:
-                if j == i:
-                  continue
-                else:
-                  j.uncheck_()
-              print("Raised to ", (b))
-            elif a == 3:
-              c = players_in_play.index(i)
-              if c < len(players_in_play)-1:
-                player.player_in_turn = players_in_play[c+1]
-              else:
-                player.player_in_turn = players_in_play[0]
-              if player.check == False:
-                i.fold_()
-                print("Folded")
-              else:
+              opt_1 = 'Call ' + str(player.bet-i.current_bet)
+          print('1. ', opt_1)
+          print("2. Raise")
+          if player.bet == 0:
+            pass
+          else:
+            print('3. Fold')
+          a = int(input(f"Enter option {i.name}: "))
+          if a == 1:
+            player.player_in_turn = i
+            i.call_()
+            if player.check == True or player.bet == 0:
+              print("Check") 
+            else:
+              print("Called ", player.bet)
+          elif a == 2:
+            player.player_in_turn = i
+            b = int(input("Enter bet: "))
+            i.bet_(b)
+            i.raise_()
+            for j in players_in_play:
+              if j == i:
                 continue
+              else:
+                j.uncheck_()
+            print("Raised to ", (b))
+          elif a == 3:
+            c = players_in_play.index(i)
+            if c < len(players_in_play)-1:
+              player.player_in_turn = players_in_play[c+1]
+            else:
+              player.player_in_turn = players_in_play[0]
+            if player.check == False:
+              i.fold_()
+              print("Folded")
             else:
               continue
-            print(i.bank)
+          else:
+            continue
+          print(i.bank)
       else:
         for j in players_in_play:
           j.check_check_()
