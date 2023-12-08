@@ -194,10 +194,7 @@ class player():
   def reset(self):
     self.bet = 0
     self.current_bet = 0
-    if self.all_in:
-      pass
-    else:
-      self.check = False
+    self.check = False
 
   def check_(self):
     self.check = True
