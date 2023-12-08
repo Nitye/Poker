@@ -80,10 +80,8 @@ def pre_card_bet():
   for k in player.players:
     k.reset()
   player.reset_cls()
-  print(player.all_in_players)
   
 def post_card_bet(players_in_play, turn):
-  print(players_in_play)
   if turn == 1:
     l1 = player.table_cards[:3]
   elif turn == 2:
@@ -205,13 +203,13 @@ while True:
   print("End of Pre-Flop Bet")
   players_in_play = player.check_player_play(player.players.copy())
   post_card_bet(players_in_play, 1)
-  print('y')
+  print('Turn 1 done')
   players_in_play = player.check_player_play(players_in_play)
   post_card_bet(players_in_play, 2)
-  print('y')
+  print('Turn 2 done')
   players_in_play = player.check_player_play(players_in_play)
   post_card_bet(players_in_play, 3)
-  print('y')
+  print('Turn 3 done')
   players_in_play = player.check_player_play(players_in_play)
   if len(players_in_play) == 1:
       print(players_in_play[0].name, " wins")

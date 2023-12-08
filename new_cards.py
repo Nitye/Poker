@@ -245,7 +245,7 @@ def add_score(player, player_score):
       player_score += card_score[i]*100
   if list1[8][2] == True:
     list_dup += list1[8][1]
-    for i in list1[8][1]:
+    for i in list(list1[8][1]):
       player_score += card_score[i]*100
   return [player_score, list_dup]
  

@@ -145,9 +145,10 @@ class player():
     for i in player.players:
       if i.bank <= 0:
         player.broke_players[player.players.index(i)] = i
-        player.players.remove(i)
       else:
         continue
+    for j in list(player.broke_players.values()):
+      player.players.remove(j)
 
   @classmethod
   def broke_unbroke(cls):
@@ -229,7 +230,7 @@ class player():
 
   def call_(self):
     self.bet = player.bet
-    if self.bet-self.current_bet >= self.bank:
+    if self.bet >= self.bank:
       player.pot+=self.bank
       self.bank = 0
       self.allin()
@@ -246,7 +247,7 @@ class player():
         player.max_folds+=1
 
   def raise_(self):
-    if self.bet-self.current_bet >= self.bank:
+    if self.bet >= self.bank:
       self.allin()
       player.pot += self.bank
       self.bank = 0
