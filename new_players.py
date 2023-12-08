@@ -24,6 +24,7 @@ class player():
   hands = []
   broke_players = {}
   all_in_players = []
+  all_in_num = 0
   
   @classmethod
   def draw_winnings_(cls, num_people):
@@ -60,9 +61,12 @@ class player():
 
   @classmethod
   def check_player_play(cls, players_in_play):
+    p = []
     for i in players_in_play:
-      if not i.play: 
-        players_in_play.remove(i)
+      if not i.play or i.all_in: 
+        p.append(i)
+    for j in p:
+      players_in_play.remove(j)
     return players_in_play
   
   @classmethod
@@ -153,6 +157,7 @@ class player():
   @classmethod
   def broke_unbroke(cls):
     if len(player.broke_players) != 0:
+      p = []
       for i in list(player.broke_players.keys()):
         print("1. Rebuy")
         print("2. Spectate")
@@ -163,7 +168,7 @@ class player():
           if a == 1:
             print("Rebought")
             cls.players.insert(i, player.broke_players[i])
-            del cls.broke_players[i]
+            p.append(i)
             cls.players[i].bank+=cls._bank_
             b = 1
           elif a == 2:
@@ -176,6 +181,9 @@ class player():
             b = 1
           else:
             pass
+      for k in p:
+        del cls.broke_players[k]
+      p.clear()
 
   def __init__(self, name,  bank):
     self.__class__._bank_ = bank
@@ -202,7 +210,12 @@ class player():
   
   def allin(self):
     self.all_in = True
+    self.__class__.all_in_num+=1
     player.all_in_players.append(self)
+
+  def un_all_in(self):
+    self.all_in = False
+    self.__class__.all_in_num-=1
 
   def uncheck_(self):
     if self.all_in:
@@ -285,6 +298,8 @@ class player():
     player.turn += 1
     self.prev_bank = self.bank
     players_in_play.remove(self)
+    for i in player.all_in_players:
+      i.un_all_in()
     player.all_in_players.clear()
     player.reset_play_for_all()
     return players_in_play
@@ -294,6 +309,8 @@ class player():
     player.pot -= draw_winnings
     self.prev_bank = self.bank
     player.reset_play_for_all()
+    for i in player.all_in_players:
+      i.un_all_in()
     player.all_in_players.clear()
     player.max_folds = 0
 

@@ -229,8 +229,8 @@ def add_score(player, player_score):
     player_score += list1[3][0]['three_score']*100
     player_score += list1[3][0]['two_score']*50
   if list1[4][2] == True:
-    player_score+=60000
-    player_score = list1[4][3]*100
+    player_score += 60000
+    player_score += list1[4][3]*100
   if list1[5][1] == True:
     player_score += 45000
     player_score += list1[5][0]*100
