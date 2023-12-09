@@ -22,6 +22,7 @@ def pre_card_bet():
         if i.check == True:
           continue
         else:
+          input()
           print(i.cards)
           if player.bet-i.current_bet == 0: 
             opt_1 = 'Check'
@@ -96,6 +97,7 @@ def post_card_bet(players_in_play, turn):
           if i.check == True:
             continue
           else:
+            input()
             print(l1)
             print(i.cards)
             if player.check == True:
@@ -226,3 +228,7 @@ while True:
   player.remove_cards()
   player.check_broke()
   player.broke_unbroke()
+  if len(player.players) < 2:
+    break
+  else:
+    pass
