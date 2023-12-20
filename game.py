@@ -1,128 +1,54 @@
-from new_players import player
-import new_cards as nc
+from players import player
+import cards as nc
+import random
 
-def blind_bet():
-  for i in range(player.num_players):
-    if (player.turn)%(player.num_players)==i & i < (player.num_players-2):
-      player.blind_(player.players[i+2], player.players[i+1], player.blind_bet)
-      break
-    elif (player.turn)%(player.num_players) == (player.num_players-2):
-      player.blind_(player.players[0], player.players[-1], player.blind_bet)
-      break
-    elif (player.turn)%(player.num_players) == (player.num_players-1):
-      player.blind_(player.players[1], player.players[0], player.blind_bet)
-      break
-
-def pre_card_bet():
-  players_in_play = player.players.copy()
-  d = player.players.index(player.player_in_turn)
-  while player._play_ == True:
-    for i in players_in_play[d:]+players_in_play[:d]:
-      if player.max_folds != len(player.players)-1:
-        if i.check == True:
-          continue
-        else:
-          input()
-          print(i.cards)
-          if player.bet-i.current_bet == 0: 
-            opt_1 = 'Check'
-          else:
-            opt_1 = 'Call ' + str(player.bet-i.current_bet)
-          if (i == player.big_blind_player) & (player.bet == player.blind_bet):
-            print('1.' ,opt_1)
-            print('2. Raise')
-          else:
-            print('1.', opt_1)
-            print('2. Raise')
-            print('3. Fold')
-          a = int(input(f"Enter option {i.name}: "))
-          if a == 1:
-            player.player_in_turn = i
-            i.call_()
-            if player.check == True:
-              print("Check")
-            else:
-              print("Called ", player.bet)
-          elif a == 2:
-            player.player_in_turn = i
-            b = int(input("Enter bet: "))
-            i.bet_(b)
-            i.raise_()
-            for j in players_in_play:
-              if j == i:
-                continue
-              else:
-                j.uncheck_()
-            print("Raised to ", (b))
-          elif a == 3:
-            c = player.players.index(i)
-            if c < len(player.players)-1:
-              player.player_in_turn = player.players[c+1]
-            else:
-              player.player_in_turn = player.players[0]
-            if (i == player.big_blind_player) & (player.bet == player.blind_bet):
-              continue
-            else:
-              i.fold_()
-              print("Folded")
-          else:
-            continue
-          print(i.bank)
-      else:
-        for j in players_in_play:
-          j.check_check_()
-        players_in_play = player.check_player_play(players_in_play)
-        player.check_play_(players_in_play)
+class Game:
+  @classmethod
+  def blind_bet(g):
+    for i in range(g.num_players):
+      if (g.turn)%(g.num_players)==i & i < (g.num_players-2):
+        g.blind_(g.players[i+2], g.players[i+1], g.blind_bet)
         break
-      for j in players_in_play:
-        j.check_check_()
-      players_in_play = player.check_player_play(players_in_play)
-      player.check_play_(players_in_play)
-  for k in player.players:
-    k.reset()
-  player.reset_cls()
-  
-def post_card_bet(players_in_play, turn):
-  if turn == 1:
-    l1 = player.table_cards[:3]
-  elif turn == 2:
-    l1 = player.table_cards[:4]
-  else:
-    l1 = player.table_cards
-  d = player.players.index(player.player_in_turn)
-  while player._play_ == True:
-    if len(players_in_play) > 1:
+      elif (g.turn)%(g.num_players) == (g.num_players-2):
+        g.blind_(g.players[0], g.players[-1], g.blind_bet)
+        break
+      elif (g.turn)%(g.num_players) == (g.num_players-1):
+        g.blind_(g.players[1], g.players[0], g.blind_bet)
+        break
+
+  @classmethod
+  def pre_card_bet(g):
+    players_in_play = g.players.copy()
+    d = g.players.index(g.player_in_turn)
+    while g._play_ == True:
       for i in players_in_play[d:]+players_in_play[:d]:
-        if player.max_folds != player.num_players-1:
+        if g.max_folds != len(g.players)-1:
           if i.check == True:
             continue
           else:
             input()
-            print(l1)
             print(i.cards)
-            if player.check == True:
+            if g.bet-i.current_bet == 0: 
               opt_1 = 'Check'
-            else: 
-              if player.bet-i.current_bet == 0:
-                opt_1 = 'Check'
-              else:
-                opt_1 = 'Call ' + str(player.bet-i.current_bet)
-            print('1. ', opt_1)
-            print("2. Raise")
-            if player.bet == 0:
-              pass
             else:
+              opt_1 = 'Call ' + str(g.bet-i.current_bet)
+            if (i == g.big_blind_player) & (g.bet == g.blind_bet):
+              print('1.' ,opt_1)
+              print('2. Raise')
+            else:
+              print('1.', opt_1)
+              print('2. Raise')
               print('3. Fold')
             a = int(input(f"Enter option {i.name}: "))
             if a == 1:
-              player.player_in_turn = i
+              g.player_in_turn = i
               i.call_()
-              if player.check == True or player.bet == 0:
-                print("Check") 
+              if g.check == True:
+                print("Check")
               else:
-                print("Called ", player.bet)
+                print("Called ", g.bet)
             elif a == 2:
-              player.player_in_turn = i
+              g.player_in_turn = i
               b = int(input("Enter bet: "))
               i.bet_(b)
               i.raise_()
@@ -133,102 +59,302 @@ def post_card_bet(players_in_play, turn):
                   j.uncheck_()
               print("Raised to ", (b))
             elif a == 3:
-              c = players_in_play.index(i)
-              if c < len(players_in_play)-1:
-                player.player_in_turn = players_in_play[c+1]
+              c = g.players.index(i)
+              if c < len(g.players)-1:
+                g.player_in_turn = g.players[c+1]
               else:
-                player.player_in_turn = players_in_play[0]
-              if player.check == False:
+                g.player_in_turn = g.players[0]
+              if (i == g.big_blind_player) & (g.bet == g.blind_bet):
+                continue
+              else:
                 i.fold_()
                 print("Folded")
-              else:
-                continue
             else:
               continue
             print(i.bank)
         else:
           for j in players_in_play:
             j.check_check_()
-          players_in_play = player.check_player_play(players_in_play)
-          player.check_play_(players_in_play)
+          players_in_play = g.check_player_play(players_in_play)
+          g.check_play_(players_in_play)
           break
         for j in players_in_play:
           j.check_check_()
-        players_in_play = player.check_player_play(players_in_play)
-        player.check_play_(players_in_play)
+        players_in_play = g.check_player_play(players_in_play)
+        g.check_play_(players_in_play)
+    for k in g.players:
+      k.reset()
+    g.reset_cls()
+    
+  @classmethod
+  def post_card_bet(players_in_play, turn, g):
+    if turn == 1:
+      l1 = g.table_cards[:3]
+    elif turn == 2:
+      l1 = g.table_cards[:4]
     else:
-      break
-  for k in player.players:
-    k.reset()
-  player.reset_cls()
+      l1 = g.table_cards
+    d = g.players.index(g.player_in_turn)
+    while g._play_ == True:
+      if len(players_in_play) > 1:
+        for i in players_in_play[d:]+players_in_play[:d]:
+          if g.max_folds != g.num_players-1:
+            if i.check == True:
+              continue
+            else:
+              input()
+              print(l1)
+              print(i.cards)
+              if g.check == True:
+                opt_1 = 'Check'
+              else: 
+                if g.bet-i.current_bet == 0:
+                  opt_1 = 'Check'
+                else:
+                  opt_1 = 'Call ' + str(g.bet-i.current_bet)
+              print('1. ', opt_1)
+              print("2. Raise")
+              if g.bet == 0:
+                pass
+              else:
+                print('3. Fold')
+              a = int(input(f"Enter option {i.name}: "))
+              if a == 1:
+                g.player_in_turn = i
+                i.call_()
+                if g.check == True or g.bet == 0:
+                  print("Check") 
+                else:
+                  print("Called ", g.bet)
+              elif a == 2:
+                g.player_in_turn = i
+                b = int(input("Enter bet: "))
+                i.bet_(b)
+                i.raise_()
+                for j in players_in_play:
+                  if j == i:
+                    continue
+                  else:
+                    j.uncheck_()
+                print("Raised to ", (b))
+              elif a == 3:
+                c = players_in_play.index(i)
+                if c < len(players_in_play)-1:
+                  g.player_in_turn = players_in_play[c+1]
+                else:
+                  g.player_in_turn = players_in_play[0]
+                if g.check == False:
+                  i.fold_()
+                  print("Folded")
+                else:
+                  continue
+              else:
+                continue
+              print(i.bank)
+          else:
+            for j in players_in_play:
+              j.check_check_()
+            players_in_play = g.check_player_play(players_in_play)
+            g.check_play_(players_in_play)
+            break
+          for j in players_in_play:
+            j.check_check_()
+          players_in_play = g.check_player_play(players_in_play)
+          g.check_play_(players_in_play)
+      else:
+        break
+    for k in g.players:
+      k.reset()
+    g.reset_cls()
 
-def add_score_for_all(players_in_play):
-  for i in players_in_play:
-    i.add_score()
-    player.player_scores[i] = i.score
+  def add_score_for_all(players_in_play, g):
+    for i in players_in_play:
+      i.add_score()
+      g.player_scores[i] = i.score
 
-def compare_score(player_scores, players_in_play):
-  max_score = max(player_scores.values())
-  d = nc.remove_dup_list(player_scores.values())[1]
-  if d[max(d.keys())] == 1:
-    for z in players_in_play:
-      if max_score == player_scores[z]:
-        print(f"{z.name} wins")
-        z.win_(players_in_play)
-        player.player_scores.pop(z)
-  else:
-    draw_winnings = player.draw_winnings_(d[max(d.keys())])
-    for y in players_in_play:
-      if y.score == max(d.keys()):
-        y.draw_(draw_winnings)
-    print('Draw')
+  @classmethod
+  def compare_score(player_scores, players_in_play, g):
+    max_score = max(player_scores.values())
+    d = nc.remove_dup_list(player_scores.values())[1]
+    if d[max(d.keys())] == 1:
+      for z in players_in_play:
+        if max_score == player_scores[z]:
+          print(f"{z.name} wins")
+          z.win_(players_in_play)
+          g.player_scores.pop(z)
+    else:
+      draw_winnings = g.draw_winnings_(d[max(d.keys())])
+      for y in players_in_play:
+        if y.score == max(d.keys()):
+          y.draw_(draw_winnings)
+      print('Draw')
 
-b = int(input("Enter number of people: "))
-bank = int(input("Enter bank: "))
-for a in range(b):
-  s = str("Enter player " + str(a+1) + ": ")
-  name = input(s)
-  player(name, bank)
+  def __init__(self):
+    self.id = 0
+    self.num_players = 0
+    self.players = []
+    self.deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
+      '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
+        '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
+          '♦A', '♦2', '♦3', '♦4', '♦5', '♦6', '♦7', '♦8', '♦9', '♦10', '♦J', '♦Q', '♦K']
+    self.pot = 0
+    self.turn = 0
+    self.bet = 0
+    self._play_ = True
+    self.check = True
+    self.big_blind_player = None
+    self.player_in_turn = None
+    self.max_folds = 0
+    self._bank_ = 0
+    self.table_cards = None
+    self.blind_bet = 0
+    self.an = 0
+    self.player_scores = {}
+    self.hands = []
+    self.broke_players = {}
+    self.all_in_players = []
+    self.all_in_num = 0
 
-while True:
-  player.hands = []
-  player.big_blind_player = None
-  player.set_ante_and_blind_bet()
-  player.ante()
-  blind_bet()
-  k = player.players.index(player.big_blind_player) + 1
-  if k < player.num_players:
-    pass
-  else:
-    k = 0
-  player.player_in_turn = player.players[k]
-  player.distribute_cards()
-  player.add_cards()
-  pre_card_bet()
-  print("End of Pre-Flop Bet")
-  players_in_play = player.check_player_play(player.players.copy())
-  post_card_bet(players_in_play, 1)
-  print('Turn 1 done')
-  players_in_play = player.check_player_play(players_in_play)
-  post_card_bet(players_in_play, 2)
-  print('Turn 2 done')
-  players_in_play = player.check_player_play(players_in_play)
-  post_card_bet(players_in_play, 3)
-  print('Turn 3 done')
-  players_in_play = player.check_player_play(players_in_play)
-  players_in_play = list(set(players_in_play + player.all_in_players))
-  if len(players_in_play) == 1:
-      print(players_in_play[0].name, " wins")
-      players_in_play[0].win_(players_in_play)
-  else:
-    add_score_for_all(players_in_play)
-    while player.pot != 0:
-      compare_score(player.player_scores, players_in_play)
-      players_in_play = player.check_player_play(players_in_play)
-  player.remove_cards()
-  player.check_broke()
-  player.broke_unbroke()
-  if len(player.players) < 2:
-    break
-  else:
-    pass
+  def reset_cls(self):
+    self._play_ = True
+    self.bet = 0
+    self.deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
+      '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
+        '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
+          '♦A', '♦2', '♦3', '♦4', '♦5', '♦6', '♦7', '♦8', '♦9', '♦10', '♦J', '♦Q', '♦K']
+
+  def draw_winnings_(self, num_people):
+    self.turn += 1
+    return self.pot/num_people
+
+  def set_ante_and_blind_bet(cls):
+    c = cls._bank_//50
+    _ = cls._bank_//200
+    blind_bets = [c*a for a in range(1,6)]
+    antes = [_*a for a in range(1,6)]
+    if cls.turn <= 5:
+      cls.blind_bet = round(blind_bets[0])
+      cls.an = round(antes[0])
+    elif cls.turn <= 10:
+      cls.blind_bet = round(blind_bets[1])
+      cls.an = round(antes[1])
+    elif cls.turn <= 15:
+      cls.blind_bet = round(blind_bets[2])
+      cls.an = round(antes[2])
+    elif cls.turn <= 20:
+      cls.blind_bet = round(blind_bets[3])
+      cls.an = round(antes[3])
+    else:
+      cls.blind_bet = round(blind_bets[4])
+      cls.an = round(antes[4])
+
+  def check_player_play(self, players_in_play):
+    p = []
+    for i in players_in_play:
+      if not i.play or i.all_in: 
+        p.append(i)
+    for j in p:
+      players_in_play.remove(j)
+    return players_in_play
+  
+  def check_play_(self, players_in_play):
+    c = 0
+    for i in players_in_play:
+      if i.check == True:
+        c+=1
+      else:
+        pass
+    if len(players_in_play) != 1:
+      if c == len(players_in_play):
+        self._play_ = False
+      else:
+        self._play_ = True
+    else:
+      self._play_ = False
+
+  def blind_(self, player1, player2, blind_bet):
+    self.bet = blind_bet
+    player1.big_blind_(blind_bet)
+    player2.small_blind_(blind_bet)
+
+  def reset_all_(self):
+    for i in self.players:
+      i.reset()
+
+  def reset_play_for_all(self):
+    for i in self.players:
+      i.play = True
+
+  def draw_cards(self, num):
+    a = 0
+    dummy_hand = []
+    while a < num:
+      card_a = random.choice(self.deck)
+      removed_card_index = self.deck.index(card_a)
+      self.deck.pop(removed_card_index)
+      a+=1
+      dummy_hand.append(card_a)
+    return dummy_hand
+
+  def distribute_cards(self):
+    card_num = (self.num_players*2) + 5
+    chosen_cards = self.draw_cards(card_num)
+    b = 0
+    while b < self.num_players:
+      self.hands.append(chosen_cards[2*b:2*(b+1)])
+      b+=1
+    self.table_cards = chosen_cards[2*self.num_players:]
+
+  def add_cards(self):
+    i = 0
+    for j in self.players:
+      j.cards = self.hands[i]
+      i+=1
+
+  def remove_cards(self):
+    for j in self.players:
+      j.cards = None
+
+  def ante(self):
+    for k in self.players:
+      self.pot+=self.an
+      k.bank-=self.an
+
+  def check_broke(self):
+    for i in self.players:
+      if i.bank <= 0:
+        self.broke_players[self.players.index(i)] = i
+      else:
+        continue
+    for j in list(self.broke_players.values()):
+      self.players.remove(j)
+
+  def broke_unbroke(self):
+    if len(self.broke_players) != 0:
+      p = []
+      for i in list(self.broke_players.keys()):
+        print("1. Rebuy")
+        print("2. Spectate")
+        print("3. Leave Table")
+        b = 0
+        while b == 0:
+          a = int(input(f"Enter option {self.broke_players[i].name}: "))
+          if a == 1:
+            print("Rebought")
+            self.players.insert(i, self.broke_players[i])
+            p.append(i)
+            self.players[i].bank+=self._bank_
+            b = 1
+          elif a == 2:
+            del self.broke_players[i]
+            self.num_players-=1
+            print("Spectating")
+            b = 1
+          elif a == 3:
+            self.num_players-=1
+            b = 1
+          else:
+            pass
+      for k in p:
+        del self.broke_players[k]
+      p.clear()
