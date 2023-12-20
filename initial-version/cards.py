@@ -1,3 +1,5 @@
+import random
+import pandas as pd
 deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
          '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
            '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
@@ -36,6 +38,32 @@ royal_flush_patterns =  [[['\u2660A','\u2660K','\u2660Q','\u2660J','\u26601']],
                           [['\u2665A','\u2665K','\u2665Q','\u2665J','\u26651']],
                           [['\u2666A','\u2666K','\u2666Q','\u2666J','\u26661']]]
 
+
+def draw_cards(num):
+  a = 0
+  dummy_hand = []
+  while a < num:
+    card_a = random.choice(deck)
+    removed_card_index = deck.index(card_a)
+    deck.pop(removed_card_index)
+    a+=1
+    dummy_hand.append(card_a)
+  return dummy_hand
+
+def distribute_cards(num_of_players):
+  hands={}
+  table_cards = []
+
+  card_num = (num_of_players*2) + 5
+  chosen_cards = draw_cards(card_num)
+  b = 0
+  while b < num_of_players:
+    hands["hand%s" %(b+1)] = chosen_cards[2*b:2*(b+1)]
+    b+=1
+  table_cards = chosen_cards[2*num_of_players:]
+  hands['table_cards'] = table_cards
+  return hands
+
 def num_of_a_kind(num, card, list1):
   list1_count = 0
   for i in range(0,7):
@@ -51,13 +79,15 @@ def num_of_a_kind(num, card, list1):
   return result
 
 def royal_flush(player,player_score):
-  list1 = [player[i] for i in range(7)]
+  list1 = []
   royal_flush_bool = False
   score = 120000
+  for i in range(0,7):
+    list1.append(player[i])
   for m in royal_flush_patterns:
     for j in m:
       l = 0
-      for k in range(5):
+      for k in range(0,5):
         if j[k] in list1:
           l+=1
         else: 
@@ -229,8 +259,8 @@ def add_score(player, player_score):
     player_score += list1[3][0]['three_score']*100
     player_score += list1[3][0]['two_score']*50
   if list1[4][2] == True:
-    player_score += 60000
-    player_score += list1[4][0]*100
+    player_score+=60000
+    player_score = list1[4][3]*100
   if list1[5][1] == True:
     player_score += 45000
     player_score += list1[5][0]*100
@@ -245,7 +275,7 @@ def add_score(player, player_score):
       player_score += card_score[i]*100
   if list1[8][2] == True:
     list_dup += list1[8][1]
-    for i in list(list1[8][1]):
+    for i in list1[8][1]:
       player_score += card_score[i]*100
   return [player_score, list_dup]
  
@@ -293,3 +323,23 @@ def remove_dup_list(list1):
       b.append(i)
     d[i] = a
   return [b,d]
+
+def compare_hands(hands, num_players):
+  player_scores = {}
+  player_hands = {}
+  player_list_dict = {}
+  b = 0
+  while b < num_players:
+    player_scores["player%s_score" %(b+1)] = 0
+    b+=1
+  y = 0
+  while y < num_players:
+    player_hands["player%s" %(y+1)] = hands["hand%s" %(y+1)] + hands['table_cards']
+    y+=1
+  for i in range(0, num_players):
+    player_list_dict["player%s_list" %(i+1)] = add_score(player_hands["player%s" %(i+1)], player_scores["player%s_score" %(i+1)])
+    player_scores["player%s_score" %(i+1)] = add_high_card_score(player_hands["player%s" %(i+1)], player_list_dict["player%s_list" %(i+1)][0], player_list_dict["player%s_list" %(i+1)][1])
+
+  return player_scores
+
+
