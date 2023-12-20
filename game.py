@@ -4,7 +4,7 @@ import random
 
 class Game:
   @classmethod
-  def blind_bet(g):
+  def blind_bet_(cls, g):
     for i in range(g.num_players):
       if (g.turn)%(g.num_players)==i & i < (g.num_players-2):
         g.blind_(g.players[i+2], g.players[i+1], g.blind_bet)
@@ -15,9 +15,11 @@ class Game:
       elif (g.turn)%(g.num_players) == (g.num_players-1):
         g.blind_(g.players[1], g.players[0], g.blind_bet)
         break
+    for i in g.sendable_players:
+      i.update()
 
   @classmethod
-  def pre_card_bet(g):
+  def pre_card_bet(cls, g):
     players_in_play = g.players.copy()
     d = g.players.index(g.player_in_turn)
     while g._play_ == True:
@@ -87,7 +89,7 @@ class Game:
     g.reset_cls()
     
   @classmethod
-  def post_card_bet(players_in_play, turn, g):
+  def post_card_bet(cls, players_in_play, turn, g):
     if turn == 1:
       l1 = g.table_cards[:3]
     elif turn == 2:
@@ -167,13 +169,14 @@ class Game:
       k.reset()
     g.reset_cls()
 
-  def add_score_for_all(players_in_play, g):
+  @classmethod
+  def add_score_for_all(cls, players_in_play, g):
     for i in players_in_play:
       i.add_score()
       g.player_scores[i] = i.score
 
   @classmethod
-  def compare_score(player_scores, players_in_play, g):
+  def compare_score(cls, player_scores, players_in_play, g):
     max_score = max(player_scores.values())
     d = nc.remove_dup_list(player_scores.values())[1]
     if d[max(d.keys())] == 1:
@@ -189,10 +192,12 @@ class Game:
           y.draw_(draw_winnings)
       print('Draw')
 
-  def __init__(self):
+  def __init__(self, num_players, bank):
     self.id = 0
-    self.num_players = 0
+    self.num_players = num_players
+    self.clients = {}
     self.players = []
+    self.sendable_players = []
     self.deck = ['♠A', '♠2', '♠3', '♠4', '♠5', '♠6', '♠7', '♠8', '♠9', '♠10', '♠J', '♠Q', '♠K',
       '♣A', '♣2', '♣3', '♣4', '♣5', '♣6', '♣7', '♣8', '♣9', '♣10', '♣J', '♣Q', '♣K',
         '♥A', '♥2', '♥3', '♥4', '♥5', '♥6', '♥7', '♥8', '♥9', '♥10', '♥J', '♥Q', '♥K',
@@ -205,7 +210,7 @@ class Game:
     self.big_blind_player = None
     self.player_in_turn = None
     self.max_folds = 0
-    self._bank_ = 0
+    self._bank_ = bank
     self.table_cards = None
     self.blind_bet = 0
     self.an = 0

@@ -1,17 +1,26 @@
 import cards as nc
-import random
+
+class sendable_player:
+  def __init__(self, p):
+    self.update(p)
+
+  def update(self, p):
+    self.bank = p.bank
+    self.name = p.name
+    self.cards = p.cards
+    self.all_in = p.all_in
+    self.bet = p.bet
+    self.current_bet = p.current_bet
+    self.prev_bank = p.prev_bank
 
 class player():
   def __init__(self, name,  bank, game):
     self.g = game
-    self.g._bank_ = bank
     self.name = name
     self.bank = bank
     self.prev_bank = bank
     self.play = True
     self.cards = None
-    self.g.players.append(self)
-    self.g.num_players+=1
     self.all_in = False
     self.check = False
     self.score = 0
@@ -134,6 +143,6 @@ class player():
 
   def add_score(self):
     cards = self.cards + self.g.table_cards
-    l1 = cards.add_score(cards, 0)
+    l1 = nc.add_score(cards, 0)
     self.score += nc.add_high_card_score(cards, l1[0], l1[1])
 
