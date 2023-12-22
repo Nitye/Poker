@@ -12,6 +12,8 @@ class sendable_player:
     self.bet = p.bet
     self.current_bet = p.current_bet
     self.prev_bank = p.prev_bank
+    self.option = p.option
+    self.table = p.table
 
 class player():
   def __init__(self, name,  bank, game):
@@ -24,8 +26,9 @@ class player():
     self.all_in = False
     self.check = False
     self.score = 0
+    self.option = 0
+    self.table = []
     self.reset()
-    print(self.name, self.bank)
 
   def reset(self):
     self.bet = 0

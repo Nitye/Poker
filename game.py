@@ -1,8 +1,45 @@
 from players import player
 import cards as nc
 import random
+import pickle
 
 class Game:
+  @classmethod
+  def send_players(cls, g):
+    print(g.players[0].name, g.players[1].name, g.players[2].name)
+    print(g.players[0].name, g.players[0].cards)
+    print(g.players[1].name, g.players[1].cards)
+    print(g.players[2].name, g.players[2].cards)
+    for i in g.players:
+      g.clients[i.name]['conn'].sendall(pickle.dumps({'id': 0, 'players': g.sendable_players}))
+
+  @classmethod
+  def send_str(cls, g, i, data):
+    g.clients[i.name]['conn'].sendall(pickle.dumps({'id': 1, 'message': data}))
+
+  @classmethod
+  def send_str_all(cls, g, data):
+    for i in g.players:
+      g.clients[i.name]['conn'].sendall(pickle.dumps({'id': 1, 'message': data}))
+  
+  @classmethod
+  def send_dict(cls, g, i, msg, params):
+    g.clients[i.name]['conn'].sendall(pickle.dumps({'id': 2,'msg':msg, 'params':params}))
+
+  @classmethod
+  def send_dict_all(cls, g, name, msg, params=''):
+    for i in g.players:
+      g.clients[i.name]['conn'].sendall(pickle.dumps({'id': 22, 'name': name, 'msg':msg, 'params':params}))
+
+  # @classmethod
+  # def get_input(cls, g, i, inp_statement):
+  #   g.clients[i.name]['conn'].sendall(pickle.dumps({'id':3, 'inp_statement': inp_statement}))
+  #   while True:
+  #     try:
+  #       return g.clients[i.name]['conn'].recv(64).decode()
+  #     except:
+  #       pass
+
   @classmethod
   def blind_bet_(cls, g):
     for i in range(g.num_players):
@@ -16,7 +53,7 @@ class Game:
         g.blind_(g.players[1], g.players[0], g.blind_bet)
         break
     for i in g.sendable_players:
-      i.update()
+      i.update(g.clients[i.name]['player_obj'])
 
   @classmethod
   def pre_card_bet(cls, g):
@@ -28,7 +65,6 @@ class Game:
           if i.check == True:
             continue
           else:
-            input()
             print(i.cards)
             if g.bet-i.current_bet == 0: 
               opt_1 = 'Check'
@@ -37,21 +73,29 @@ class Game:
             if (i == g.big_blind_player) & (g.bet == g.blind_bet):
               print('1.' ,opt_1)
               print('2. Raise')
+              Game.send_dict(g, i, 'bet-1', opt_1)
             else:
               print('1.', opt_1)
               print('2. Raise')
               print('3. Fold')
-            a = int(input(f"Enter option {i.name}: "))
+              Game.send_dict(g, i, 'bet-2', opt_1)
+            g.clients[i.name]['sendable_player_obj'] = pickle.loads(g.clients[i.name]['conn'].recv(2048))
+            a = int(g.clients[i.name]['sendable_player_obj'].option)
+            print(a)
             if a == 1:
               g.player_in_turn = i
               i.call_()
               if g.check == True:
-                print("Check")
+                print(i.name, ": Checked")
+                Game.send_dict_all(g, i.name, 'bet-res-1')
               else:
-                print("Called ", g.bet)
+                print(i.name, ": Called ", g.bet)
+                Game.send_dict_all(g, i.name, 'bet-res-2', g.bet)
             elif a == 2:
+              Game.send_dict(g, i, 'bet-3', '')
               g.player_in_turn = i
-              b = int(input("Enter bet: "))
+              g.clients[i.name]['sendable_player_obj'] = pickle.loads(g.clients[i.name]['conn'].recv(2048))
+              b = int(g.clients[i.name]['sendable_player_obj'].option)
               i.bet_(b)
               i.raise_()
               for j in players_in_play:
@@ -59,7 +103,8 @@ class Game:
                   continue
                 else:
                   j.uncheck_()
-              print("Raised to ", (b))
+              print(i.name, ": Raised to ", (b))
+              Game.send_dict_all(g, i.name, 'bet-res-3', b)
             elif a == 3:
               c = g.players.index(i)
               if c < len(g.players)-1:
@@ -70,18 +115,25 @@ class Game:
                 continue
               else:
                 i.fold_()
-                print("Folded")
+                print(i.name, ": Folded")
+                Game.send_dict_all(g, i.name, 'bet-res-4')
             else:
-              continue
+              print('not_working')
             print(i.bank)
         else:
           for j in players_in_play:
             j.check_check_()
+          for i in g.sendable_players:
+            i.update(g.clients[i.name]['player_obj'])
+          Game.send_players(g)
           players_in_play = g.check_player_play(players_in_play)
           g.check_play_(players_in_play)
           break
         for j in players_in_play:
           j.check_check_()
+        for i in g.sendable_players:
+          i.update(g.clients[i.name]['player_obj'])
+        Game.send_players(g)
         players_in_play = g.check_player_play(players_in_play)
         g.check_play_(players_in_play)
     for k in g.players:
@@ -90,11 +142,11 @@ class Game:
     
   @classmethod
   def post_card_bet(cls, players_in_play, turn, g):
-    if turn == 1:
+    if turn == 'a':
       l1 = g.table_cards[:3]
-    elif turn == 2:
+    elif turn == 'b':
       l1 = g.table_cards[:4]
-    else:
+    elif turn == 'c':
       l1 = g.table_cards
     d = g.players.index(g.player_in_turn)
     while g._play_ == True:
@@ -104,7 +156,6 @@ class Game:
             if i.check == True:
               continue
             else:
-              input()
               print(l1)
               print(i.cards)
               if g.check == True:
@@ -117,20 +168,29 @@ class Game:
               print('1. ', opt_1)
               print("2. Raise")
               if g.bet == 0:
+                m = str('bet-1' + turn)
+                Game.send_dict(g, i, m, opt_1)
                 pass
               else:
                 print('3. Fold')
-              a = int(input(f"Enter option {i.name}: "))
+                m = str('bet-2' + turn)
+                Game.send_dict(g, i, m, opt_1)
+              g.clients[i.name]['sendable_player_obj'] = pickle.loads(g.clients[i.name]['conn'].recv(2048))
+              a = int(g.clients[i.name]['sendable_player_obj'].option)
               if a == 1:
                 g.player_in_turn = i
                 i.call_()
                 if g.check == True or g.bet == 0:
-                  print("Check") 
+                  print("Check")
+                  Game.send_dict_all(g, i.name, 'bet-res-1') 
                 else:
                   print("Called ", g.bet)
+                  Game.send_dict_all(g, i.name, 'bet-res-2', g.bet)
               elif a == 2:
+                Game.send_dict(g, i, 'bet-3', '')
                 g.player_in_turn = i
-                b = int(input("Enter bet: "))
+                g.clients[i.name]['sendable_player_obj'] = pickle.loads(g.clients[i.name]['conn'].recv(2048))
+                b = int(g.clients[i.name]['sendable_player_obj'].option)
                 i.bet_(b)
                 i.raise_()
                 for j in players_in_play:
@@ -139,6 +199,7 @@ class Game:
                   else:
                     j.uncheck_()
                 print("Raised to ", (b))
+                Game.send_dict_all(g, i.name, 'bet-res-3', b)
               elif a == 3:
                 c = players_in_play.index(i)
                 if c < len(players_in_play)-1:
@@ -148,6 +209,7 @@ class Game:
                 if g.check == False:
                   i.fold_()
                   print("Folded")
+                  Game.send_dict_all(g, i.name, 'bet-res-4')
                 else:
                   continue
               else:
@@ -156,11 +218,17 @@ class Game:
           else:
             for j in players_in_play:
               j.check_check_()
+            for i in g.sendable_players:
+              i.update(g.clients[i.name]['player_obj'])
+            Game.send_players(g)
             players_in_play = g.check_player_play(players_in_play)
             g.check_play_(players_in_play)
             break
           for j in players_in_play:
             j.check_check_()
+          for i in g.sendable_players:
+            i.update(g.clients[i.name]['player_obj'])
+          Game.send_players(g)
           players_in_play = g.check_player_play(players_in_play)
           g.check_play_(players_in_play)
       else:
@@ -183,14 +251,20 @@ class Game:
       for z in players_in_play:
         if max_score == player_scores[z]:
           print(f"{z.name} wins")
+          Game.send_dict_all(g, z.name, 'res-1', g.pot)
           z.win_(players_in_play)
           g.player_scores.pop(z)
     else:
       draw_winnings = g.draw_winnings_(d[max(d.keys())])
+      draw_players = []
       for y in players_in_play:
         if y.score == max(d.keys()):
+          draw_players.append(y.name) 
           y.draw_(draw_winnings)
-      print('Draw')
+      Game.send_dict_all(g, y.name, 'res-2', {'amt':draw_winnings, 'players':draw_players})  
+      print('Draw between:', end=' ')
+      for i in draw_players:
+        print(i, end =' ')
 
   def __init__(self, num_players, bank):
     self.id = 0
@@ -219,6 +293,8 @@ class Game:
     self.broke_players = {}
     self.all_in_players = []
     self.all_in_num = 0
+    print(f'Game initiated with {num_players} players and Bank: {bank}')
+    print('Waiting for players...')
 
   def reset_cls(self):
     self._play_ = True
@@ -314,6 +390,7 @@ class Game:
     i = 0
     for j in self.players:
       j.cards = self.hands[i]
+      j.table = self.table_cards
       i+=1
 
   def remove_cards(self):

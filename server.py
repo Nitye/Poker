@@ -12,18 +12,11 @@ disc_msg = 'Disconnect'
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(addr)
-print('Server started, listening for connections...')
-
-def handle_client(name, g):
-  msg = g.clients[name]['conn'].recv(header).decode(format)
-  if msg == disc_msg:
-    g.clients[name]['conn'].close()
-    msg = 'Disconnected'
-  print(f"[{name}]: {msg}")
+print('Server started')
 
 def start(num, bank):
-  s.listen(num)
   g = Game(num, bank)
+  s.listen(num)
   while len(g.players) < g.num_players:
     conn, addr = s.accept()
     name = conn.recv(2048).decode(format)
@@ -31,13 +24,16 @@ def start(num, bank):
     send_p = sendable_player(p)
     g.players.append(p)
     g.sendable_players.append(send_p)
-    print(f"New Connection {name} connected")
+    print(f"New Player {name} connected")
     g.clients[name] = dict()
     g.clients[name]['addr'] = addr
     g.clients[name]['conn'] = conn
     g.clients[name]['player_obj'] = p
     g.clients[name]['sendable_player_obj'] = send_p
-    conn.send(pickle.dumps(send_p))
+    conn.sendall(pickle.dumps(send_p))
+  print(g.sendable_players[0].name, g.sendable_players[1].name, g.sendable_players[2].name)
+  for i in g.players:
+    g.clients[i.name]['conn'].sendall(pickle.dumps(g.sendable_players))
   return g
 
 g = start(3, 1000)
@@ -55,17 +51,24 @@ while True:
   g.player_in_turn = g.players[k]
   g.distribute_cards()
   g.add_cards()
+  for i in g.sendable_players:
+    i.update(g.clients[i.name]['player_obj'])
+  Game.send_players(g)
   Game.pre_card_bet(g)
   print("End of Pre-Flop Bet")
+  Game.send_str_all(g, 'End of Pre-Flop Bet')
   players_in_play = g.check_player_play(g.players.copy())
-  Game.post_card_bet(players_in_play, 1, g)
-  print('Turn 1 done')
+  Game.post_card_bet(players_in_play, 'a', g)
+  print('Turn 1 betting done')
+  Game.send_str_all(g, 'Turn 1 betting done')
   players_in_play = g.check_player_play(players_in_play)
-  Game.post_card_bet(players_in_play, 2, g)
-  print('Turn 2 done')
+  Game.post_card_bet(players_in_play, 'b', g)
+  print('Turn 2 betting done')
+  Game.send_str_all(g, 'Turn 2 betting done')
   players_in_play = g.check_player_play(players_in_play)
-  Game.post_card_bet(players_in_play, 3, g)
-  print('Turn 3 done')
+  Game.post_card_bet(players_in_play, 'c', g)
+  print('Turn 3 betting done')
+  Game.send_str_all(g, 'Turn 3 betting done')
   players_in_play = g.check_player_play(players_in_play)
   players_in_play = list(set(players_in_play + g.all_in_players))
   if len(players_in_play) == 1:
@@ -74,11 +77,13 @@ while True:
   else:
     Game.add_score_for_all(players_in_play, g)
     while g.pot != 0:
-      Game.compare_score(g.player_scores, players_in_play)
+      Game.compare_score(g.player_scores, players_in_play, g)
       players_in_play = g.check_player_play(players_in_play)
   g.remove_cards()
+  Game.send_players(g)
   g.check_broke()
   g.broke_unbroke()
+  Game.send_players(g)
   if len(g.players) < 2:
     break
   else:
