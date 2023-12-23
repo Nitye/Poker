@@ -65,23 +65,9 @@ class Client:
         print('Enter option:', end=' ')
         self.send_state()
       elif mesg['msg'] == 'bet-1a':
-        print(self.p.table[:3])
+        print(mesg['params']['list'])
         print(self.p.cards)
-        print('1. ', mesg['params'])
-        print('2. Raise')
-        print('Enter option:', end=' ')
-        self.send_state()
-      elif mesg['msg'] == 'bet-1b':
-        print(self.p.table[:4])
-        print(self.p.cards)
-        print('1. ', mesg['params'])
-        print('2. Raise')
-        print('Enter option:', end=' ')
-        self.send_state()
-      elif mesg['msg'] == 'bet-1c':
-        print(self.p.table)
-        print(self.p.cards)
-        print('1. ', mesg['params'])
+        print('1. ', mesg['params']['opt'])
         print('2. Raise')
         print('Enter option:', end=' ')
         self.send_state()
@@ -93,31 +79,21 @@ class Client:
         print('Enter option:', end=' ')
         self.send_state()
       elif mesg['msg'] == 'bet-2a':
-        print(self.p.table[:3])
+        print(mesg['params']['list'])
         print(self.p.cards)
-        print('1. ', mesg['params'])
-        print('2. Raise')
-        print('3. Fold')
-        print('Enter option:', end=' ')
-        self.send_state()
-      elif mesg['msg'] == 'bet-2b':
-        print(self.p.table[:4])
-        print(self.p.cards)
-        print('1. ', mesg['params'])
-        print('2. Raise')
-        print('3. Fold')
-        print('Enter option:', end=' ')
-        self.send_state()
-      elif mesg['msg'] == 'bet-2c':
-        print(self.p.table)
-        print(self.p.cards)
-        print('1. ', mesg['params'])
+        print('1. ', mesg['params']['opt'])
         print('2. Raise')
         print('3. Fold')
         print('Enter option:', end=' ')
         self.send_state()
       elif mesg['msg'] == 'bet-3':
         print('Enter bet:', end=' ')
+        self.send_state()
+      elif mesg['msg'] == 'broke':
+        print('1. Rebought')
+        print('2. Spectate Table')
+        print('3. Leave Table')
+        print('Enter option:', end=' ')
         self.send_state()
     elif mesg['id'] == 22:
       if mesg['msg'] == 'bet-res-1':
@@ -129,12 +105,18 @@ class Client:
       elif mesg['msg'] == 'bet-res-4':
         print(mesg['name'], ': Folded')
       elif mesg['msg'] == 'res-1':
-        print(mesg['name'], ': Wins, Pot: ', msg['params'])
+        print(mesg['name'], ': Wins pot of ', msg['params'])
       elif mesg['msg'] == 'res-2':
         print('Tie between:', end=' ')
         for i in  mesg['params']['players']:
           print(i, end=' ')
         print('Split Pot: ', mesg['params']['amt'])
+      elif mesg['msg'] == 'broke-res-1':
+        print(mesg['name'], ': Rebought')
+      elif mesg['msg'] == 'broke-res-2':
+        print(mesg['name'], ': Spectating')
+      elif mesg['msg'] == 'broke-res-3':
+        print(mesg['name'], ': Left the table')
     elif mesg['id'] == 3:
       inp_statement = mesg['inp_statement']
       print(inp_statement, end = ' ')

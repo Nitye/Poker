@@ -27,7 +27,7 @@ class player():
     self.check = False
     self.score = 0
     self.option = 0
-    self.table = []
+    self.table = None
     self.reset()
 
   def reset(self):

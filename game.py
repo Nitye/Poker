@@ -168,13 +168,11 @@ class Game:
               print('1. ', opt_1)
               print("2. Raise")
               if g.bet == 0:
-                m = str('bet-1' + turn)
-                Game.send_dict(g, i, m, opt_1)
+                Game.send_dict(g, i, 'bet-1a', {'opt' : opt_1, 'list' : l1})
                 pass
               else:
                 print('3. Fold')
-                m = str('bet-2' + turn)
-                Game.send_dict(g, i, m, opt_1)
+                Game.send_dict(g, i, 'bet-2a', {'opt' : opt_1, 'list' : l1})
               g.clients[i.name]['sendable_player_obj'] = pickle.loads(g.clients[i.name]['conn'].recv(2048))
               a = int(g.clients[i.name]['sendable_player_obj'].option)
               if a == 1:
@@ -418,21 +416,28 @@ class Game:
         print("1. Rebuy")
         print("2. Spectate")
         print("3. Leave Table")
+        Game.send_dict(self, i, 'broke', '')
         b = 0
         while b == 0:
-          a = int(input(f"Enter option {self.broke_players[i].name}: "))
+          self.clients[self.broke_players[i].name]['sendable_player_obj'] = pickle.loads(self.clients[self.broke_players[i].name]['conn'].recv(2048))
+          a = int(self.clients[self.broke_players[i].name]['sendable_player_obj'].option)
           if a == 1:
-            print("Rebought")
+            print(self.broke_players[i].name, ": Rebought")
+            Game.send_dict_all(self, self.broke_players[i].name, 'broke-res-1')
             self.players.insert(i, self.broke_players[i])
             p.append(i)
             self.players[i].bank+=self._bank_
             b = 1
           elif a == 2:
-            del self.broke_players[i]
+            print(self.broke_players[i].name, ": Spectating")
+            Game.send_dict_all(self, self.broke_players[i].name, 'broke-res-2')
+            p.append(i)
             self.num_players-=1
-            print("Spectating")
             b = 1
           elif a == 3:
+            print(self.broke_players[i].name, ": Left the table")
+            Game.send_dict_all(self, self.broke_players[i].name, 'broke-res-3')
+            p.append(i)
             self.num_players-=1
             b = 1
           else:
